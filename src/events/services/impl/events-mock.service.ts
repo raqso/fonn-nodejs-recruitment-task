@@ -59,7 +59,18 @@ export class EventsMockService implements EventsService {
   }
 
   removeEvent(id: string): Promise<void> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+    try {
+      const isEventExisting = this._events.findIndex((event) => event.id === id) > -1;
+      if (!isEventExisting) {
+        throw new NonExistingRecord(id, 'event');
+      }
+
+      this._events = this._events.filter((event) => event.id !== id);
+
+      return Promise.resolve();
+    } catch(error) {
+      return Promise.reject(error);
+    }
   }
+
 }

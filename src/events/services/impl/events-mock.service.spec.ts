@@ -88,8 +88,8 @@ describe('EventsMockService', () => {
       expect(typeof eventsService.getEvent).toBe('function');
     });
 
-    it('is gets past event by id', () => {
-      expect(eventsService.getEvent('25ac2e05-b1e8-47b4-b46c-c0bd7004bfa9')).resolves.toHaveProperty('id');
+    it('is gets past event by id', async () => {
+      await expect(eventsService.getEvent('25ac2e05-b1e8-47b4-b46c-c0bd7004bfa9')).resolves.toHaveProperty('id');
     });
 
     it('is gets current event by id', async () => {
@@ -118,6 +118,24 @@ describe('EventsMockService', () => {
     it('is defined of type function', () => {
       expect(eventsService.removeEvent).toBeDefined();
       expect(typeof eventsService.removeEvent).toBe('function');
+    });
+
+    it('is removes past event by id', async () => {
+      await expect(eventsService.removeEvent('25ac2e05-b1e8-47b4-b46c-c0bd7004bfa9')).resolves;
+    });
+
+    it('is removes current event by id', async () => {
+      const currentEvent = await createCurrentEvent();
+      await expect(eventsService.removeEvent(currentEvent.id)).resolves;
+    });
+
+    it('is removes future event by id', async () => {
+      const futureEvent = await createCurrentEvent();
+      await expect(eventsService.removeEvent(futureEvent.id)).resolves;
+    });
+
+    it('throws Error for non existing ids', async () => {
+      await expect(eventsService.removeEvent('non-existing-id')).rejects.toThrow(NonExistingRecord);
     });
   });
 });
