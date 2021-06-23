@@ -14,6 +14,71 @@ describe('EventsMockService', () => {
       expect(eventsService.createEvent).toBeDefined();
       expect(typeof eventsService.createEvent).toBe('function');
     });
+
+    describe('user should be able to create events at any time', () => {
+      it('creates past event', async () => {
+        const eventPast = await eventsService.createEvent(
+          '2017-01-02T14:00:00.000Z',
+          '2017-01-03T14:00:00.000Z',
+          'Super past event',
+        );
+
+        expect(eventPast.id).toBeDefined();
+      });
+
+      it('creates current event', async () => {
+        const today = new Date();
+        const eventCurrent = await eventsService.createEvent(
+          today.toISOString(),
+          addDays(today, 2).toISOString(),
+          'Super current event',
+        );
+
+        expect(eventCurrent.id).toBeDefined();
+      });
+
+      it('creates future event', async () => {
+        const today = new Date();
+        const eventDate = addDays(today, 300);
+        const eventFuture = await eventsService.createEvent(
+          eventDate.toISOString(),
+          addDays(eventDate, 2).toISOString(),
+          'Super current event',
+        );
+
+        expect(eventFuture.id).toBeDefined();
+      });
+    });
+
+    it("user should be able to create a new event with the same start time as the previous one's end time", async () => {
+      const firstEvent = await eventsService.createEvent(
+        '2017-01-02T14:00:00.000Z',
+        '2017-01-03T14:00:00.000Z',
+        'Super past event',
+      );
+      const secondEvent = await eventsService.createEvent(
+        firstEvent.endDate,
+        '2017-01-05T14:00:00.000Z',
+        'Super past event',
+      );
+
+      expect(secondEvent.id).toBeDefined();
+    });
+
+    it("user shouldn't be able to create events with conflicted time", async () => {
+      const firstEvent = await eventsService.createEvent(
+        '2017-01-02T14:00:00.000Z',
+        '2017-01-03T14:00:00.000Z',
+        'Super past event',
+      );
+      const secondEventCreating = eventsService.createEvent(
+        firstEvent.endDate,
+        '2017-01-05T14:00:00.000Z',
+        'Super past event',
+      );
+
+      await expect(secondEventCreating).rejects.toThrowError();
+    });
   });
 
   describe('getEvent()', () => {
@@ -37,3 +102,10 @@ describe('EventsMockService', () => {
     });
   });
 });
+
+function addDays(date: Date, days: number) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+
+  return result;
+}
