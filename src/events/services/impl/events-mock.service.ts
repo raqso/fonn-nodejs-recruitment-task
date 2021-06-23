@@ -35,8 +35,16 @@ export class EventsMockService implements EventsService {
   }
 
   getEvent(id: string): Promise<Event> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+    try {
+      const eventRecord = this._events.find((event) => event.id === id);
+      if (!eventRecord) {
+        throw Error('Event doesnt exist');
+      }
+
+      return Promise.resolve(eventRecord);
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   getEvents(

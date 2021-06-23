@@ -3,9 +3,9 @@ import { EventsService } from '../events.service';
 import { EventsMockService } from './events-mock.service';
 import { EventsMockData } from '../../mock-data/event';
 
-describe('EventsMockService', () => {
-  let eventsService: EventsService;
+let eventsService: EventsService;
 
+describe('EventsMockService', () => {
   beforeEach(() => {
     eventsService = new EventsMockService([...EventsMockData]);
   });
@@ -28,24 +28,13 @@ describe('EventsMockService', () => {
       });
 
       it('creates current event', async () => {
-        const today = new Date();
-        const eventCurrent = await eventsService.createEvent(
-          today.toISOString(),
-          addDays(today, 2).toISOString(),
-          'Super current event',
-        );
+        const eventCurrent = await createCurrentEvent();
 
         expect(eventCurrent.id).toBeDefined();
       });
 
       it('creates future event', async () => {
-        const today = new Date();
-        const eventDate = addDays(today, 300);
-        const eventFuture = await eventsService.createEvent(
-          eventDate.toISOString(),
-          addDays(eventDate, 2).toISOString(),
-          'Super current event',
-        );
+        const eventFuture = await createFutureEvent();
 
         expect(eventFuture.id).toBeDefined();
       });
@@ -97,6 +86,20 @@ describe('EventsMockService', () => {
       expect(eventsService.getEvent).toBeDefined();
       expect(typeof eventsService.getEvent).toBe('function');
     });
+
+    it('is gets past event by id', () => {
+      expect(eventsService.getEvent('25ac2e05-b1e8-47b4-b46c-c0bd7004bfa9')).resolves.toHaveProperty('id');
+    });
+
+    it('is gets current event by id', async () => {
+      const currentEvent = await createCurrentEvent();
+      expect(eventsService.getEvent(currentEvent.id)).resolves.toHaveProperty('id');
+    });
+
+    it('is gets future event by id', async () => {
+      const futureEvent = await createCurrentEvent();
+      expect(eventsService.getEvent(futureEvent.id)).resolves.toHaveProperty('id');
+    });
   });
 
   describe('getEvents()', () => {
@@ -119,4 +122,16 @@ function addDays(date: Date, days: number) {
   result.setDate(result.getDate() + days);
 
   return result;
+}
+
+function createCurrentEvent() {
+  const today = new Date();
+  return eventsService.createEvent(today.toISOString(), addDays(today, 2).toISOString(), 'Super current event');
+}
+
+function createFutureEvent() {
+  const today = new Date();
+  const eventDate = addDays(today, 300);
+
+  return eventsService.createEvent(eventDate.toISOString(), addDays(eventDate, 2).toISOString(), 'Super future event');
 }
