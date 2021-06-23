@@ -13,26 +13,25 @@ function validateDateString(date: string) {
   throw new InvalidDateError();
 }
 
-/* eslint-disable */
 export class EventsMockService implements EventsService {
   constructor(private _events: Event[]) {}
 
   createEvent(dateFrom: string, dateTo: string, title: string): Promise<Event> {
     try {
-    validateDateString(dateFrom);
-    validateDateString(dateTo);
+      validateDateString(dateFrom);
+      validateDateString(dateTo);
 
-    if (!this.isDatesAvailable(dateFrom, dateTo)) {
-      throw new InvalidDateError('Dates not available');
+      if (!this.isDatesAvailable(dateFrom, dateTo)) {
+        throw new InvalidDateError('Dates not available');
+      }
+
+      const newEvent: Event = { startDate: dateFrom, endDate: dateTo, title, id: generateId() };
+      this._events.push(newEvent);
+
+      return Promise.resolve(newEvent);
+    } catch (error) {
+      return Promise.reject(error);
     }
-
-    const newEvent: Event = { startDate: dateFrom, endDate: dateTo, title, id: generateId() };
-    this._events.push(newEvent);
-
-    return Promise.resolve(newEvent);
-  } catch (error) {
-    return Promise.reject(error)
-  }
   }
 
   getEvent(id: string): Promise<Event> {
@@ -83,7 +82,7 @@ export class EventsMockService implements EventsService {
       this._events = this._events.filter((event) => event.id !== id);
 
       return Promise.resolve();
-    } catch(error) {
+    } catch (error) {
       return Promise.reject(error);
     }
   }
@@ -102,7 +101,7 @@ export class EventsMockService implements EventsService {
     });
   }
 
-  private isInRange(el: any, start: any, end: any){
-  return el >= start && el < end;
-}
+  private isInRange(el: any, start: any, end: any) {
+    return el >= start && el < end;
+  }
 }
