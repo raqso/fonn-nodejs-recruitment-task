@@ -112,6 +112,57 @@ describe('EventsMockService', () => {
       expect(eventsService.getEvents).toBeDefined();
       expect(typeof eventsService.getEvents).toBe('function');
     });
+
+    it('is returns object with events key', async () => {
+      await expect(
+        eventsService.getEvents('2020-01-01T09:00:00.000Z', '2020-01-01T09:01:00.000Z', 0, 1),
+      ).resolves.toHaveProperty('events');
+    });
+
+    it('is gets past events', async () => {
+      const { events } = await eventsService.getEvents('2020-01-01T09:00:00.000Z', '2020-01-01T11:01:00.000Z', 0, 1);
+
+      expect(events).toHaveLength(1);
+    });
+
+    it('is gets current events', async () => {
+      const event = await createCurrentEvent();
+      const { events } = await eventsService.getEvents(event.startDate, event.endDate, 0, 10);
+
+      expect(events.map((event) => event.id).includes(event.id)).toBe(true);
+    });
+
+    it('is gets future events', async () => {
+      const event = await createFutureEvent();
+      const { events } = await eventsService.getEvents(event.startDate, event.endDate, 0, 10);
+
+      expect(events.map((event) => event.id).includes(event.id)).toBe(true);
+    });
+
+    it('is gets events with limit', async () => {
+      const { events: events1 } = await eventsService.getEvents(
+        '1970-01-01T09:00:00.000Z',
+        '2050-01-01T11:01:00.000Z',
+        0,
+        1,
+      );
+      const { events: events10 } = await eventsService.getEvents(
+        '1970-01-01T09:00:00.000Z',
+        '2050-01-01T11:01:00.000Z',
+        0,
+        10,
+      );
+      const { events: events100 } = await eventsService.getEvents(
+        '1970-01-01T09:00:00.000Z',
+        '2050-01-01T11:01:00.000Z',
+        0,
+        100,
+      );
+
+      expect(events1).toHaveLength(1);
+      expect(events10).toHaveLength(10);
+      expect(events100).toHaveLength(100);
+    });
   });
 
   describe('removeEvent()', () => {

@@ -52,10 +52,25 @@ export class EventsMockService implements EventsService {
     dateFrom: string,
     dateTo: string,
     offset: number,
-    limit: number
+    limit: number,
   ): Promise<{ totalCount: number; events: Event[] }> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+    try {
+      validateDateString(dateFrom);
+      validateDateString(dateTo);
+
+      const foundRecords = this._events.filter(
+        (event) => new Date(event.startDate) >= new Date(dateFrom) && new Date(event.endDate) <= new Date(dateTo),
+      );
+      const recordsWithOffset = foundRecords.slice(offset);
+      const records = recordsWithOffset.slice(0, limit);
+
+      return Promise.resolve({
+        totalCount: records.length,
+        events: records,
+      });
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   removeEvent(id: string): Promise<void> {
@@ -73,4 +88,21 @@ export class EventsMockService implements EventsService {
     }
   }
 
+  private isDatesAvailable(dateFromText: string, dateToText: string) {
+    return this._events.every((event) => {
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      const dateFrom = new Date(dateFromText);
+      const dateTo = new Date(dateToText);
+
+      const isStartInRange = this.isInRange(dateFrom, startDate, endDate);
+      const isEndInRange = this.isInRange(dateTo, startDate, endDate);
+
+      return !isStartInRange && !isEndInRange;
+    });
+  }
+
+  private isInRange(el: any, start: any, end: any){
+  return el >= start && el < end;
+}
 }
