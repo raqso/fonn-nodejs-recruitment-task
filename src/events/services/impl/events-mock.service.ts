@@ -14,17 +14,24 @@ function validateDateString(date: string) {
 
 /* eslint-disable */
 export class EventsMockService implements EventsService {
-  constructor(private _events: Event[]) {
-  }
+  constructor(private _events: Event[]) {}
 
   createEvent(dateFrom: string, dateTo: string, title: string): Promise<Event> {
-      validateDateString(dateFrom);
-      validateDateString(dateTo);
+    try {
+    validateDateString(dateFrom);
+    validateDateString(dateTo);
 
-      const newEvent: Event = { startDate: dateFrom, endDate: dateTo, title, id: generateId() };
-      this._events.push(newEvent);
+    if (!this.isDatesAvailable(dateFrom, dateTo)) {
+      throw new InvalidDateError('Dates not available');
+    }
 
-      return Promise.resolve(newEvent);
+    const newEvent: Event = { startDate: dateFrom, endDate: dateTo, title, id: generateId() };
+    this._events.push(newEvent);
+
+    return Promise.resolve(newEvent);
+  } catch (error) {
+    return Promise.reject(error)
+  }
   }
 
   getEvent(id: string): Promise<Event> {

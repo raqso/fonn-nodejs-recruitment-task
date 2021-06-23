@@ -73,32 +73,22 @@ describe('EventsMockService', () => {
         'Super past event',
       );
       const secondEventCreating = eventsService.createEvent(
-        firstEvent.endDate,
+        firstEvent.startDate,
         '2017-01-05T14:00:00.000Z',
         'Super past event',
       );
 
-      await expect(secondEventCreating).rejects.toThrowError();
+      await expect(secondEventCreating).rejects.toThrow(InvalidDateError);
     });
 
     it("user shouldn't be able to create event with invalid date format", async () => {
-      try {
-        await eventsService.createEvent('date', '', 'Super event');
-      } catch (error) {
-        expect(error).toBeInstanceOf(InvalidDateError);
-      }
-
-      try {
-        await eventsService.createEvent('2017-01-02T14:00:00.000Z', '2017-01-03T14:00:00.000Z', 'Super event');
-      } catch (error) {
-        expect(error).toBeInstanceOf(InvalidDateError);
-      }
-
-      try {
-        await eventsService.createEvent('Toss a coin to a Witcher', '2017-01-03T14:00:00.000Z', 'Super event');
-      } catch (error) {
-        expect(error).toBeInstanceOf(InvalidDateError);
-      }
+      await expect(eventsService.createEvent('date', '', 'Super event')).rejects.toThrow(InvalidDateError);
+      await expect(
+        eventsService.createEvent('2017-01-02T14:00:00.000Z', '2017-01-03T14:00:00.000ZAA', 'Super event'),
+      ).rejects.toThrow(InvalidDateError);
+      await expect(
+        eventsService.createEvent('Toss a coin to a Witcher', '2017-01-03T14:00:00.000Z', 'Super event'),
+      ).rejects.toThrow(InvalidDateError);
     });
   });
 
