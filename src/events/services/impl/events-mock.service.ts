@@ -1,5 +1,16 @@
 import { EventsService } from '../events.service';
 import { Event } from '../../models/event';
+import { v4 as generateId } from 'uuid';
+import { InvalidDateError } from '../../errors/InvalidDate';
+
+function validateDateString(date: string) {
+  const isDateValid = !!Date.parse(date);
+  if (isDateValid) {
+    return;
+  }
+
+  throw new InvalidDateError();
+}
 
 /* eslint-disable */
 export class EventsMockService implements EventsService {
@@ -7,8 +18,13 @@ export class EventsMockService implements EventsService {
   }
 
   createEvent(dateFrom: string, dateTo: string, title: string): Promise<Event> {
-    // @ts-ignore
-    return Promise.resolve({}); // todo: implement method
+      validateDateString(dateFrom);
+      validateDateString(dateTo);
+
+      const newEvent: Event = { startDate: dateFrom, endDate: dateTo, title, id: generateId() };
+      this._events.push(newEvent);
+
+      return Promise.resolve(newEvent);
   }
 
   getEvent(id: string): Promise<Event> {

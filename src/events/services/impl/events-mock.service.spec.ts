@@ -1,3 +1,4 @@
+import { InvalidDateError } from './../../errors/InvalidDate';
 import { EventsService } from '../events.service';
 import { EventsMockService } from './events-mock.service';
 import { EventsMockData } from '../../mock-data/event';
@@ -78,6 +79,26 @@ describe('EventsMockService', () => {
       );
 
       await expect(secondEventCreating).rejects.toThrowError();
+    });
+
+    it("user shouldn't be able to create event with invalid date format", async () => {
+      try {
+        await eventsService.createEvent('date', '', 'Super event');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InvalidDateError);
+      }
+
+      try {
+        await eventsService.createEvent('2017-01-02T14:00:00.000Z', '2017-01-03T14:00:00.000Z', 'Super event');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InvalidDateError);
+      }
+
+      try {
+        await eventsService.createEvent('Toss a coin to a Witcher', '2017-01-03T14:00:00.000Z', 'Super event');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InvalidDateError);
+      }
     });
   });
 
