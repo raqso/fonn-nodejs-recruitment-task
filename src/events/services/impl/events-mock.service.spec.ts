@@ -1,3 +1,4 @@
+import { NonExistingRecord } from './../../errors/NonExistingRecord';
 import { InvalidDateError } from './../../errors/InvalidDate';
 import { EventsService } from '../events.service';
 import { EventsMockService } from './events-mock.service';
@@ -93,12 +94,16 @@ describe('EventsMockService', () => {
 
     it('is gets current event by id', async () => {
       const currentEvent = await createCurrentEvent();
-      expect(eventsService.getEvent(currentEvent.id)).resolves.toHaveProperty('id');
+      await expect(eventsService.getEvent(currentEvent.id)).resolves.toHaveProperty('id');
     });
 
     it('is gets future event by id', async () => {
       const futureEvent = await createCurrentEvent();
-      expect(eventsService.getEvent(futureEvent.id)).resolves.toHaveProperty('id');
+      await expect(eventsService.getEvent(futureEvent.id)).resolves.toHaveProperty('id');
+    });
+
+    it('throws Error for non existing ids', async () => {
+      await expect(eventsService.getEvent('non-existing-id')).rejects.toThrow(NonExistingRecord);
     });
   });
 

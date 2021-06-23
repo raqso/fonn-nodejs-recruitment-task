@@ -1,3 +1,4 @@
+import { NonExistingRecord } from './../../errors/NonExistingRecord';
 import { EventsService } from '../events.service';
 import { Event } from '../../models/event';
 import { v4 as generateId } from 'uuid';
@@ -38,7 +39,7 @@ export class EventsMockService implements EventsService {
     try {
       const eventRecord = this._events.find((event) => event.id === id);
       if (!eventRecord) {
-        throw Error('Event doesnt exist');
+        throw new NonExistingRecord(id, 'event');
       }
 
       return Promise.resolve(eventRecord);
