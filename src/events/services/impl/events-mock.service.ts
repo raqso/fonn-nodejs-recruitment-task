@@ -1,18 +1,9 @@
+import { v4 as generateId } from 'uuid';
+import { isDateInRange, validateDateString } from '../../helpers/date';
 import { NonExistingRecord } from './../../errors/NonExistingRecord';
 import { EventsService } from '../events.service';
 import { Event } from '../../models/event';
-import { v4 as generateId } from 'uuid';
 import { InvalidDateError } from '../../errors/InvalidDate';
-
-function validateDateString(date: string) {
-  const isDateValid = !!Date.parse(date);
-  if (isDateValid) {
-    return;
-  }
-
-  throw new InvalidDateError();
-}
-
 export class EventsMockService implements EventsService {
   constructor(private _events: Event[]) {}
 
@@ -21,7 +12,7 @@ export class EventsMockService implements EventsService {
       validateDateString(dateFrom);
       validateDateString(dateTo);
 
-      if (!this.isDatesAvailable(dateFrom, dateTo)) {
+      if (!this.areDatesAvailable(dateFrom, dateTo)) {
         throw new InvalidDateError('Dates not available');
       }
 
@@ -74,8 +65,8 @@ export class EventsMockService implements EventsService {
 
   removeEvent(id: string): Promise<void> {
     try {
-      const isEventExisting = this._events.findIndex((event) => event.id === id) > -1;
-      if (!isEventExisting) {
+      const isEventExist = this._events.findIndex((event) => event.id === id) > -1;
+      if (!isEventExist) {
         throw new NonExistingRecord(id, 'event');
       }
 
@@ -87,21 +78,19 @@ export class EventsMockService implements EventsService {
     }
   }
 
-  private isDatesAvailable(dateFromText: string, dateToText: string) {
-    return this._events.every((event) => {
+  private areDatesAvailable(dateFromText: string, dateToText: string) {
+    return this._events.every(getIsNotConflicted);
+
+    function getIsNotConflicted(event: Event) {
       const startDate = new Date(event.startDate);
       const endDate = new Date(event.endDate);
       const dateFrom = new Date(dateFromText);
       const dateTo = new Date(dateToText);
 
-      const isStartInRange = this.isInRange(dateFrom, startDate, endDate);
-      const isEndInRange = this.isInRange(dateTo, startDate, endDate);
+      const isStartInRange = isDateInRange(dateFrom, startDate, endDate);
+      const isEndInRange = isDateInRange(dateTo, startDate, endDate);
 
       return !isStartInRange && !isEndInRange;
-    });
-  }
-
-  private isInRange(el: any, start: any, end: any) {
-    return el >= start && el < end;
+    }
   }
 }
